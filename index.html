@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<style>
+		* {
+			margin: 0;
+		}
+		body {
+			margin: 0;
+			padding: 0.7em;
+			background-color: #333;
+		}
+		@keyframes myfirst
+		{
+			0%   {-webkit-transform: perspective(1000px) rotateX(  0deg) rotateY(  0deg) rotateZ(  0deg);}
+			40%  {-webkit-transform: perspective(1000px) rotateX(  0deg) rotateY(  0deg) rotateZ(  0deg);}
+			60%  {-webkit-transform: perspective(1000px) rotateX(-10deg) rotateY( 10deg) rotateZ(  0deg);}
+			70%  {-webkit-transform: perspective(1000px) rotateX(-30deg) rotateY( 45deg) rotateZ(-10deg);}
+			80%  {-webkit-transform: perspective(1000px) rotateX(  0deg) rotateY( 45deg) rotateZ(-10deg);}
+			90%  {-webkit-transform: perspective(1000px) rotateX(  0deg) rotateY( 10deg) rotateZ( 10deg);}
+			100% {-webkit-transform: perspective(1000px) rotateX( 10deg) rotateY( 10deg) rotateZ( 10deg);}
+		}
+		#mydiv {
+			padding: 1em;
+			color: #F8F8F2;
+			background-color: #272822;
+			border: 2px solid #ccc;
+			border-radius: 0.5em;
+			/*overflow: auto;*/
+			/*animation: myfirst 20s infinite alternate;*/
+		}
+		#mydiv * {
+			font-size: 1em;
+		}
+		#mydiv h1 {
+			color: #ccc;
+			font-size: 2em;
+			font-family: "微软雅黑", sans-serif;
+		}
+		#mydiv a {
+			color: white;
+		}
+		.lang1 {
+			color: #F92672;
+		}
+		.lang2 {
+			color: #66D9EF;
+			font-style: italic;
+		}
+		.const {
+			color: #AE81FF;
+		}
+		.name {
+			color: #A6E22E;
+		}
+		.lang3 {
+			color: #66D9EF;
+		}
+		.string {
+			color: #E6DB74;
+		}
+		.comment {
+			color: #75715E;
+		}
+	</style>
+</head>
+<body>
+	<div id="mydiv"></div>
+	<script type="text/javascript">
+		/***********************************************************
+		 **
+		 **                  打字机动画效果库
+		 **
+		 **        Author: Ganlv(https://github.com/ganlvtech/)
+		 **
+		 **          LICENSE: Apache License, Version 2.0
+		 **
+		 **********************************************************/
+		function TypeWriter(root, rootContent) {
+			this.root = root;
+			this.rootContent = rootContent;
+			return function start(content) {
+				if (content === undefined)
+					content = rootContent;
+				if (content.node === undefined)
+					content.node = root;
+				if (content.index === undefined)
+					content.index = 0;
+				for (; content.index < content.length; ++content.index) {
+					window.scrollTo(0, document.body.clientHeight);
+					switch (content[content.index][0]) {
+						case "speed":
+							content.speed = content[content.index][1];
+							break;
+						case "sleep":
+							setTimeout(start, content[content.index++][1]);
+							return true;
+						case "style":
+							content.node.style.cssText = content[content.index][1];
+							break;
+						case "class":
+							content.node.className = content[content.index][1];
+							break;
+						case "remove":
+							if (content[content.index][1] === undefined || content[content.index][1] === "")
+								content.node.remove();
+							else
+								document.getElementById(content[content.index][1]).remove();
+							break;
+						case "back":
+							if (content.node.innerText.length > 0)
+								content.node.innerText = content.node.innerText.slice(0, -1);
+							if (content.node.innerText.length > 0) {
+								setTimeout(start, content.speed);
+								return true;
+							}
+							break;
+						case "text":
+							if (content[content.index].index === undefined)
+								content[content.index].index = 0;
+							else
+								content.node.innerText += content[content.index][1][content[content.index].index++];
+							if (content[content.index].index < content[content.index][1].length) {
+								setTimeout(start, content.speed);
+								return true;
+							}
+							break;
+						case "append":
+							content.node.innerText += content[content.index][1];
+							break;
+						case "html":
+							content.node.innerHTML = content[content.index][1];
+							break;
+						case "node":
+							if (content[content.index][2].node === undefined) {
+								if (content.cursor !== undefined)
+									content.cursor.style.display = "none";
+								var child = document.createElement(content[content.index][1]);
+								content[content.index][2].speed = content.speed;
+								content[content.index][2].node = child;
+								content.node.appendChild(child);
+								var cursor = document.createElement("span");
+								cursor.style.cssText = "color: #ccc; font-family: Consolas, monospace;"
+								cursor.innerText = "_";
+								content[content.index][2].cursor = cursor;
+								content.node.appendChild(cursor);
+							}
+							if (start(content[content.index][2]))
+								return true;
+							content[content.index][2].cursor.remove();
+							if (content.cursor !== undefined)
+								content.cursor.style.display = "inline";
+							break;
+					}
+				}
+				return false;
+			};
+		}
+		/******************** TypeWriter library finished ********************/
+		var mydiv = document.getElementById("mydiv");
+		(window.onresize = function () {
+			mydiv.style.fontSize = (window.innerWidth / 40) + "px";
+		})();
+		function showEWG() {
+			mydiv.innerHTML = "";
+			(new TypeWriter(mydiv, [
+				["speed", 100],
+				["node", "code", [
+					["node", "pre", [
+						["style", "font-family: Consolas, monospace;"],
+						["sleep", 600],
+						["node", "p", [
+							["node", "span", [
+								["text", "<?"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "php"],
+								["class", ""]
+							]]
+						]],
+						["sleep", 600],
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						["sleep", 300],
+						
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "*"],
+								["class", "comment"],
+								["text", "*"]
+							]]
+						]],
+						["speed", 0],
+						["node", "p", [
+							["node", "span", [
+								["class", "comment"],
+								["text", " * eeyes web group"]
+							]]
+						]],
+						["node", "p", [
+							["class", "comment"],
+							["node", "span", [
+								["text", " * "]
+							]],
+							["node", "span", [
+								["text", "@author"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " Geeks in eeyes"]
+							]]
+						]],
+						["node", "p", [
+							["class", "comment"],
+							["node", "span", [
+								["text", " * "]
+							]],
+							["node", "span", [
+								["text", "@copyright"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " eeyes.net"]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["class", "comment"],
+								["text", " */"]
+							]]
+						]],
+						
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", "          __   __                     _   "]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", "   ___  __\\ \\ / /__  ___   _ __   ___| |_ "]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", "  / _ \\/ _ \\ V / _ \\/ __| | '_ \\ / _ \\ __|"]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " |  __/  __/| |  __/\\__ \\_| | | |  __/ |_ "]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", "  \\___|\\___||_|\\___||___(_)_| |_|\\___|\\__|"]
+							]]
+						]],
+						["sleep", 300],
+						
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						
+						["speed", 50],
+						["node", "p", [
+							["node", "span", [
+								["class", "const"],
+								["text", "class"],
+								["class", "lang2"],
+								["text", " "]
+							]],
+							["node", "span", [
+								["class", "name"],
+								["text", "EeyesWebGroup"],
+								["sleep", 600],
+								["back"],
+								["text", "EWG"],
+								["sleep", 600]
+							]],
+							["node", "span", [
+								["text", " extends"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "name"],
+								["text", " TechnologyDepartment"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "implements"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "name"],
+								["text", " BackendTechnology"]
+							]],
+							["node", "span", [
+								["text", " {"],
+								["sleep", 600]
+							]]
+						]],
+						
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "protected"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " $_departmentName"]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", " ="]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'EWG'"]
+							]],
+							["node", "span", [
+								["text", ";"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "protected"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " $_age"]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", " ="]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " 15"]
+							]],
+							["node", "span", [
+								["text", ";"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "protected"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " $_technologyStack"]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", " ="]
+							]],
+							["node", "span", [
+								["text", " array"],
+								["class", "lang3"]
+							]],
+							["node", "span", [
+								["text", "("],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", "'language'"]
+							]],
+							["node", "span", [
+								["text", "         "]
+							]],
+							["node", "span", [
+								["text", "=>"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'PHP'"]
+							]],
+							["node", "span", [
+								["text", ","],
+								["sleep", 300]
+							]]
+						]],
+						["speed", 0],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", "'database'"]
+							]],
+							["node", "span", [
+								["text", "         "]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", "=>"]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'MySQL'"]
+							]],
+							["node", "span", [
+								["text", ","],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", "'operating_system'"]
+							]],
+							["node", "span", [
+								["text", " "]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", "=>"]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'Linux'"]
+							]],
+							["node", "span", [
+								["text", ","],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", "'middleware'"]
+							]],
+							["node", "span", [
+								["text", "       "]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", "=>"]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'Redis'"]
+							]],
+							["node", "span", [
+								["text", ","],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", "'framework'"]
+							]],
+							["node", "span", [
+								["text", "        "]
+							]],
+							["node", "span", [
+								["class", "lang1"],
+								["text", "=>"]
+							]],
+							["node", "span", [
+								["class", "string"],
+								["text", " 'ThinkPHP'"]
+							]],
+							["node", "span", [
+								["text", ","],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", ");"],
+								["sleep", 300]
+							]]
+						]],
+						
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						
+						["speed", 50],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Daily Activities"],
+								["sleep", 300]
+							]]
+						]],
+						
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " regularMeeting"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "() {"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Once every week"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 300]
+							]]
+						]],
+						
+						["speed", 0],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " diningParty"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "() {"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Twice every term"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 50]
+							]]
+						]],
+
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " springOuting"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "() {"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Once a year"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 50]
+							]]
+						]],
+
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " qualityDevelopment"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "() {"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Once a year"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 50]
+							]]
+						]],
+
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " winterSolsticeParty"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "() {"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " Once a year"],
+								["sleep", 50]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 300]
+							]]
+						]],
+
+						["speed", 50],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " And other activities such as"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "/"],
+								["class", "lang1"],
+								["text", "/"],
+								["class", "comment"],
+								["text", " playing games, coding together, etc."],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", "public"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " function"],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["class", "const"],
+								["text", " join"],
+								["class", "name"]
+							]],
+							["node", "span", [
+								["text", "("]
+							]],
+							["node", "span", [
+								["text", "FreshMeat "],
+								["class", "lang2"]
+							]],
+							["node", "span", [
+								["text", "$you) {"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "        "]
+							]],
+							["node", "span", [
+								["text", "$this"]
+							]],
+							["node", "span", [
+								["text", "->"],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", "_members[]"]
+							]],
+							["node", "span", [
+								["text", " ="],
+								["class", "lang1"]
+							]],
+							["node", "span", [
+								["text", " $you;"],
+								["sleep", 300]
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["append", "    "]
+							]],
+							["node", "span", [
+								["text", "}"],
+								["sleep", 300]
+							]]
+						]],
+						
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						
+						["node", "p", [
+							["node", "span", [
+								["text", "}"]
+							]]
+						]],
+						
+						["node", "p", [
+							["html", "&#8203;"]
+						]],
+						
+						["speed", 30],
+						["node", "p", [
+							["node", "span", [
+								["text", "Here are some more..."],
+								["sleep", 300],
+							]]
+						]],
+						["node", "p", [
+							["node", "span", [
+								["text", "Please wait."],
+								["speed", 1000],
+								["text", "........"],
+								["speed", 50],
+								["text", " ok"],
+								["sleep", 300]
+							]]
+						]]
+					]]
+				]],
+				["html", ""],
+				["speed", 200],
+				["sleep", 600],
+				["node", "h1", [
+					["node", "span", [
+						["text", "加入后台WEB组"],
+						["style", "color: #3fc"],
+						["sleep", 300]
+					]]
+				]],
+				["node", "h1", [
+					["node", "span", [
+						["text", "成为技术大神！"],
+						["style", "color: #39f"],
+						["sleep", 300]
+					]]
+				]],
+				["node", "p", [
+					["html", "&#8203;"]
+				]],
+				
+				["node", "p", [
+					["html", '<img src="LNMP.png" style="width: 12em;"/></p>']
+				]],
+				["sleep", 500],
+				["node", "p", [
+					["html", '<a href="http://join.eeyes.net/">加入我们</a>']
+				]],
+				["sleep", 500],
+				["node", "p", [
+					["html", '<a href="http://www.eeyes.net">西安交通大学e瞳网</a>']
+				]],
+				["sleep", 500],
+				["node", "p", [
+					["html", '<a href="javascript:showEWG()">Replay</a>']
+				]],
+			]))();
+		}
+		showEWG();
+	</script>
+</body>
+
+</html>
